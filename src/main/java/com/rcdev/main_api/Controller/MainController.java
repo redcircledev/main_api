@@ -20,7 +20,7 @@ public class MainController {
     ConcurrentMap<String, Contact> contacts = new ConcurrentHashMap<>();
     Logger logger = LoggerFactory.getLogger(MainController.class);
 
-    @GetMapping("/")
+    @GetMapping("/ping")
     public String getPingResponse(){
 
         logger.info("getPingResponse service was called...");

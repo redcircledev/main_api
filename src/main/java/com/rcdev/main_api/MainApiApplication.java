@@ -16,6 +16,8 @@ import java.util.Collections;
 @EnableSwagger2
 public class MainApiApplication {
 
+    //Please note that Swagger interface is on http://localhost:8080/swagger-ui/
+
     public static void main(String[] args) {
         SpringApplication.run(MainApiApplication.class, args);
     }
