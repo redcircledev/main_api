@@ -1,18 +1,27 @@
-package com.rcdev.main_api.models;
+package com.rcdev.main_api.Models;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ApiModel(description = "Details about the contact")
 @Entity
 @Table(name = "user_details")
-public class User_Details {
+public class User_Details implements UserDetails {
 
     @Id
     @ApiModelProperty(notes = "Unique id of the user")
@@ -29,21 +38,33 @@ public class User_Details {
     @Column(name = "usr_lst_name")
     @ApiModelProperty(notes = "User Last Name")
     private String usr_lst_name;
+    @Column(name = "usr_role")
+    @ApiModelProperty(notes = "User Role")
+    private String usr_role;
+    @Column(name = "usr_enabled")
+    @ApiModelProperty(notes = "User Enabled")
+    private boolean usr_enabled;
 
-    protected User_Details(){
+    public User_Details() {
 
     }
 
-    public User_Details(String usr_pswrd){
+    public User_Details(String usr_pswrd) {
         this.usr_pswrd = this.getMd5(usr_pswrd);
     }
 
-    public User_Details(String usr_id, String usr_pswrd, String usr_mail, String usr_fst_name, String usr_lst_name){
+    public User_Details(String usr_id, String usr_pswrd, String usr_mail, String usr_fst_name, String usr_lst_name, String usr_role, boolean usr_enabled, boolean isAlreadyHashed) {
         this.usr_id = usr_id;
-        this.usr_pswrd = this.getMd5(usr_pswrd);
+        if(isAlreadyHashed){
+            this.usr_pswrd = usr_pswrd;
+        } else {
+            this.usr_pswrd = this.getMd5(usr_pswrd);
+        }
         this.usr_mail = usr_mail;
         this.usr_fst_name = usr_fst_name;
         this.usr_lst_name = usr_lst_name;
+        this.usr_role = usr_role;
+        this.usr_enabled = usr_enabled;
     }
 
     public String getUsr_id() {
@@ -82,8 +103,24 @@ public class User_Details {
         return usr_pswrd;
     }
 
+    public String getUsr_role() {
+        return usr_role;
+    }
+
+    public void setUsr_role(String usr_role) {
+        this.usr_role = usr_role;
+    }
+
+    public boolean isUsr_enabled() {
+        return usr_enabled;
+    }
+
+    public void setUsr_enabled(boolean usr_enabled) {
+        this.usr_enabled = usr_enabled;
+    }
+
     public String getMd5(String usr_pswrd) {
-        try{
+        try {
             // Static getInstance method is called with hashing MD5
             MessageDigest md = MessageDigest.getInstance("MD5");
 
@@ -101,10 +138,50 @@ public class User_Details {
             }
             return hashtext.toString();
 
-        }catch (Error | NoSuchAlgorithmException e){
+        } catch (Error | NoSuchAlgorithmException e) {
             e.printStackTrace();
+            return null;
         }
 
-        return null;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities;
+        authorities = Arrays.stream(this.getUsr_role().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+
+        return authorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.usr_pswrd;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.usr_id;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return this.usr_enabled;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return this.usr_enabled;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return this.usr_enabled;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.usr_enabled;
     }
 }

@@ -1,4 +1,4 @@
-package com.rcdev.main_api.models;
+package com.rcdev.main_api.Models;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
