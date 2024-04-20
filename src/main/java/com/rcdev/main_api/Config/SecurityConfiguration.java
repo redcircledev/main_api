@@ -87,6 +87,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/swagger-ui/").permitAll()
                 .antMatchers("/swagger-resources/**").permitAll()
                 .antMatchers("/api/authenticate").permitAll()
+                .antMatchers("/api/getMD5").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
